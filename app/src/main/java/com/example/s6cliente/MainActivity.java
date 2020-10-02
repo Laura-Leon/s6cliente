@@ -2,6 +2,7 @@ package com.example.s6cliente;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button bIngresar;
     private EditText euser;
     private EditText econtra;
+    private BufferedReader reader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +48,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         InputStream id = socket.getInputStream();
                         OutputStream out = socket.getOutputStream();
 
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(id));
+                         reader = new BufferedReader(new InputStreamReader(id));
                         writer = new BufferedWriter( new OutputStreamWriter(out));
 
                         while(true) {
+
                             String line = reader.readLine();
-                            System.out.println(line);
+
+                            runOnUiThread(
+                                    ()-> {
+                                        Log.e("aaa", ""+line);
+                                        if (line.contains("ya esta")){
+                                            Intent i = new Intent(this,IngresoActivity.class);
+                                            startActivity(i);
+                                        }
+
+                                    }
+                            );
+
+
+
+
                         }
 
 
@@ -77,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String json = gson.toJson(obj);
                 Log.e(">>>",""+json);
               sendMessage(json);
+
                 break;
         }
 
@@ -86,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         new Thread(
                 ()-> {
                     try {
-
                         writer.write(msg+"\n");
                         writer.flush();
                     } catch (IOException e) {
